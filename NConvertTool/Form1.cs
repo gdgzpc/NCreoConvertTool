@@ -151,13 +151,15 @@ namespace NCreoConvertTool
                 //IpfcModel model = session.RetrieveModel(descModel); // 在Creo中显示模型
                 //model.Display();
 
-                // 转换格式
-                //// 3. 导出STP
+                // 3. 导出STP
                 //string stpPath = @"F:\temp\cassprt0001.stp";
                 ////IpfcExportOptions exportOptions = (IpfcExportOptions)new CMpfcExportOptions();
                 ////exportOptions.Type = (int)EpfcExportType.EpfcEXPORT_STEP;
                 //model.ExportIntf3D(stpPath, (int)EpfcExportType.EpfcEXPORT_STEP, null);
                 //Console.WriteLine("STP导出成功: " + stpPath);
+
+                //string igsPath = @"F:\temp\cassprt0001.igs";
+                //model.ExportIntf3D(igsPath, (int)EpfcExportType.EpfcEXPORT_IGES_3D, null);
 
                 //// 4. 导出JPG
                 //string jpgPath = @"F:\temp\cassprt0001.jpg";
@@ -170,8 +172,24 @@ namespace NCreoConvertTool
                 //ins.ImageDepth = EpfcRasterDepth.EpfcRASTERDEPTH_24;
                 //window.ExportRasterImage(jpgPath, ins);
 
+                //session.ChangeDirectory(@"F:\temp\");
+                //CCpfcModelDescriptor descModelCreate = new CCpfcModelDescriptor();
+                //IpfcModelDescriptor descModel = descModelCreate.Create((int)EpfcModelType.EpfcMDL_DRAWING, "cassprt0001.drw", null);
+                //IpfcModel model = session.RetrieveModel(descModel); // 在Creo中显示模型
+                //model.Display();
+
+                //string pdfPath = @"F:\temp\cassprt0001.pdf";
+                //IpfcPDFExportInstructions pdfExportInstructions = new CCpfcPDFExportInstructions().Create();
+                //model.Export(pdfPath, (IpfcExportInstructions)pdfExportInstructions);
+
+                //string dxfPath = @"F:\temp\cassprt0001.dxf";
+                //IpfcDXFExportInstructions dxfExportInstructions = new CCpfcDXFExportInstructions().Create();
+                //model.Export(dxfPath, (IpfcExportInstructions)dxfExportInstructions);
+
                 // 5. 关闭模型
-                //model.Close();
+                ////model.Erase();
+                ////session.get_CurrentWindow().Close();
+                //session.get_CurrentWindow().Clear();
 
                 return session;
             }
@@ -327,11 +345,6 @@ namespace NCreoConvertTool
         private void SetAppConfigValue(String paramName, String paramValue)
         {
             //logger.Info($"SetAppConfigValue,{paramName}:{paramValue}");
-            //Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            //AppSettingsSection appSettings = config.AppSettings;
-            //appSettings.Settings[paramName].Value = paramValue;
-            //config.Save(ConfigurationSaveMode.Modified);
-            //ConfigurationManager.RefreshSection("appSettings");
             ConfigManager.SetAppSetting(paramName, paramValue);
         }
 
@@ -559,14 +572,25 @@ namespace NCreoConvertTool
                     //exportOptions.Type = (int)EpfcExportType.EpfcEXPORT_STEP;
                     int expType = 0;
                     if (derivedOutputType.Equals("stp"))
+                    {
                         expType = (int)EpfcExportType.EpfcEXPORT_STEP;
+                        model.ExportIntf3D(outputFileName, expType, null);
+                    }
                     else if (derivedOutputType.Equals("igs"))
+                    {
                         expType = (int)EpfcExportType.EpfcEXPORT_IGES_3D;
+                        model.ExportIntf3D(outputFileName, expType, null);
+                    }
                     else if (derivedOutputType.Equals("pdf"))
-                        expType = (int)EpfcExportType.EpfcEXPORT_PDF;
+                    {
+                        IpfcPDFExportInstructions pdfExportInstructions = new CCpfcPDFExportInstructions().Create();
+                        model.Export(outputFileName, (IpfcExportInstructions)pdfExportInstructions);
+                    }
                     else if (derivedOutputType.Equals("dxf"))
-                        expType = (int)EpfcExportType.EpfcEXPORT_DXF;
-                    model.ExportIntf3D(outputFileName, expType, null);
+                    {
+                        IpfcDXFExportInstructions dxfExportInstructions = new CCpfcDXFExportInstructions().Create();
+                        model.Export(outputFileName, (IpfcExportInstructions)dxfExportInstructions);
+                    }
                 }
             }
             catch (System.Exception ex)
@@ -860,10 +884,7 @@ namespace NCreoConvertTool
                         }
                         if (model != null)//add 20250301
                         {
-                            
-                            //swApp.CloseDoc(swModel.GetTitle());
-                            //Marshal.FinalReleaseComObject(swModel);
-                            //swModel = null;
+                            session.get_CurrentWindow().Clear();
                         }
                     }
                     catch (Exception e)//20250303

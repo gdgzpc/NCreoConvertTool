@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NSWConvertTool")]
-[assembly: AssemblyDescription("SolidWork转图工具")]
+[assembly: AssemblyTitle("NCreoConvertTool")]
+[assembly: AssemblyDescription("Creo转图工具")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("凯思软件")]
-[assembly: AssemblyProduct("NSWConvertTool")]
+[assembly: AssemblyProduct("NCreoConvertTool")]
 [assembly: AssemblyCopyright("Copyright ©  CASS 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.25.0319.1")]
+[assembly: AssemblyVersion("1.25.0422.1")]
 //[assembly: AssemblyFileVersion("1.24.1126.1")]
