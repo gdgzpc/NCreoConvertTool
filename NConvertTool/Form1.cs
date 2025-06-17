@@ -41,9 +41,10 @@ namespace NCreoConvertTool
         private int openSWDocCount = 1;
         int iRunTime = 100;
         private string g_zoomToFit = "false";
+        private string g_pdfProfilePath;
 
         IpfcBaseSession session = null;
-        private string g_swPath = @"C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS\SLDWORKS.exe";
+        private string g_appPath = @"C:\Program Files\PTC\Creo 5.0.0.0\Parametric\bin\parametric.exe";
         EnoviaConnector.Connector connector = null;
 
         private System.Timers.Timer backendTimer;//20250307
@@ -127,9 +128,13 @@ namespace NCreoConvertTool
             try
             {
                 // 1. 定义Creo启动参数
-                string creoInstallPath = @"F:\Program Files\PTC\Creo 5.0.0.0\Parametric\bin\parametric.exe"; // -g:no_graphics -i:rpc_input"; // 替换为你的Creo安装路径
+                string creoInstallPath = appPath; // -g:no_graphics -i:rpc_input"; // 替换为你的Creo安装路径
                 string workingDir = @"C:\Users\Public\Documents"; // 工作目录
                 string[] creoArgs = { "-g:no_graphics" }; // 启动参数（例如：无图形模式）
+
+                string visiable = ConfigManager.GetAppSetting("CADVisiable");
+                if (!visiable.Equals("true"))
+                    creoInstallPath += " -g:no_graphics ";
 
                 // 2. 启动新的Creo进程
                 IpfcAsyncConnection asyncConnection;
@@ -211,9 +216,9 @@ namespace NCreoConvertTool
             try
             {
                 //g_swPath = System.Configuration.ConfigurationManager.AppSettings["SolidWorksPath"];
-                g_swPath = ConfigManager.GetAppSetting("SolidWorksPath");
+                g_appPath = ConfigManager.GetAppSetting("CADPath");
                 //logger.Info($"g_swPath={g_swPath}");
-                session = StartCADApp(g_swPath);
+                session = StartCADApp(g_appPath);
             }
             catch (Exception ex)
             {
@@ -240,6 +245,7 @@ namespace NCreoConvertTool
                 string g_openWaitMin = ConfigManager.GetAppSetting("OpenWaitMin");
                 g_openSWDocCount = ConfigManager.GetAppSetting("OpenSWDocCount");
                 g_zoomToFit = ConfigManager.GetAppSetting("ZoomToFit");
+                g_pdfProfilePath = ConfigManager.GetAppSetting("PdfProfilePath");
                 //password = EncryptionHelper.Decrypt(password);
                 //logger.Info("tomcatClassPath=" + tomcatClassPath);
                 logger.Info($"userName={g_userName}");
@@ -317,7 +323,7 @@ namespace NCreoConvertTool
             {
                 if (g_typeDerivedOutputsMap.Count == 0)
                 {
-                    g_typeDerivedOutputsMap = GetPropertiesFromServer(logger, g_integName, g_userName, g_password, "cassCADDerived_SOLIDWORK.properties");
+                    g_typeDerivedOutputsMap = GetPropertiesFromServer(logger, g_integName, g_userName, g_password, "cassCADDerived_PROE.properties");
                     if (g_typeDerivedOutputsMap.Count == 0)
                     {
                         throw new System.Exception("远程属性（不同类型需要哪些衍生文件）未获得！");
@@ -325,13 +331,13 @@ namespace NCreoConvertTool
                 }
                 if (g_typeAttributesMap.Count == 0)//add 20250211
                 {
-                    g_typeAttributesMap = GetPropertiesFromServer(logger, g_integName, g_userName, g_password, "cassCADAttribute_SOLIDWORK.properties");
+                    g_typeAttributesMap = GetPropertiesFromServer(logger, g_integName, g_userName, g_password, "cassCADAttribute_PROE.properties");
                     if (g_typeAttributesMap.Count == 0)
                     {
                         throw new System.Exception("远程属性（不同类型需要有哪些属性）未获得！");
                     }
 
-                    string fileType = "SLDDRW";
+                    string fileType = "DRW";
                     g_needAttributeNameList = GetNeedAttributeNameList(fileType, g_typeAttributesMap);
                 }
             }
@@ -375,7 +381,7 @@ namespace NCreoConvertTool
                 {
                     try
                     {
-                        session = StartCADApp(g_swPath);
+                        session = StartCADApp(g_appPath);
                     }
                     catch (Exception ex)
                     {
@@ -584,6 +590,7 @@ namespace NCreoConvertTool
                     else if (derivedOutputType.Equals("pdf"))
                     {
                         IpfcPDFExportInstructions pdfExportInstructions = new CCpfcPDFExportInstructions().Create();
+                        pdfExportInstructions.ProfilePath = g_pdfProfilePath;
                         model.Export(outputFileName, (IpfcExportInstructions)pdfExportInstructions);
                     }
                     else if (derivedOutputType.Equals("dxf"))
@@ -766,7 +773,7 @@ namespace NCreoConvertTool
                         ReconnEnoviaIfDisconnected();
 
                         //20250211如果是工程图，进行属性映射
-                        //if (fileType.Equals("SLDDRW"))
+                        //if (fileType.Equals("DRW"))
                         //{
                         //    myStopwatch.Reset(); myStopwatch.Restart();
                         //    GetDrawAttributeMap(swModel, g_needAttributeNameList, dataObj);
